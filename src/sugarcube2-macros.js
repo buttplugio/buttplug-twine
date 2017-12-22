@@ -39,10 +39,27 @@
 	  });
   });
 
+	function mapPayloads(payloads) {
+		let payloadMap = new Map();
+		for (let payload of payloads) {
+			payloadMap.set(payload.name, payload);
+		}
+		return payloadMap;
+	}
+
   Macro.add("buttplugloaded", {
 		tags: null,
 	  handler() {
 		  buttplugLoadingPromise.then(() => Wikifier.wikifyEval(this.payload[0].contents.trim()));
 	  }
   });
+
+	Macro.add("buttplugconnectlocal", {
+		tags: ["connecting", "success", "failure"],
+		handler() {
+			let payloadMap = mapPayloads(this.payload);
+			Wikifier.wikifyEval(payloadMap.get("connecting").contents);
+			Wikifier.wikifyEval(payloadMap.get("failure").contents);
+		}
+	});
 })();
