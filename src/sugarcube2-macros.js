@@ -31,7 +31,7 @@
 
   let buttplugLoadingPromise = new Promise((resolve, reject) => {
 	  requestScriptLoad({
-		  id     : 'lib-moment-js',
+		  id     : 'lib-buttplug-js',
 		  src    : 'https://cdn.jsdelivr.net/npm/buttplug@0.4.0/dist/web/buttplug.min.js',
 		  onload : function (evt) {
 		    resolve();
