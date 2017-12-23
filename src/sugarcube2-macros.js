@@ -56,10 +56,21 @@
 
   Macro.add("buttplugconnectlocal", {
     tags: ["connecting", "success", "failure"],
-    handler() {
+    async handler() {
       let payloadMap = mapPayloads(this.payload);
+      // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
-      Wikifier.wikifyEval(payloadMap.get("failure").contents);
+      // TODO Let user name client as argument
+      let bp = new Buttplug.ButtplugClient("Twine Buttplug Client");
+      try {
+        await bp.ConnectLocal();
+        Wikifier.wikifyEval(payloadMap.get("success").contents);
+      } catch (e) {
+        Wikifier.wikifyEval(payloadMap.get("failure").contents);
+      }
+    }
+  });
+
     }
   });
 })();
