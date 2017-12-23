@@ -71,6 +71,23 @@
     }
   });
 
+  Macro.add("buttplugstartscanning", {
+    handler() {
+    }
+  });
+
+  Macro.add("buttplugstopscanning", {
+    handler() {
+    }
+  });
+
+  Macro.add("buttplugdeviceadded", {
+    handler() {
+    }
+  });
+
+  Macro.add("buttplugdeviceremoved", {
+    handler() {
     }
   });
 })();
