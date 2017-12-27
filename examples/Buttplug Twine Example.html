@@ -153,6 +153,15 @@ var saveAs=saveAs||navigator.msSaveBlob&&navigator.msSaveBlob.bind(navigator)||f
     return payloadMap;
   }
 
+  // The Buttplug Client needs to live in macro definition scope (basically, as
+  // a private scope variable), but not in Twine State scope. Adding it as part
+  // of State.variables causes weird things to happen between passages and event
+  // listeners to not register correctly, and the client object shouldn't be
+  // serialized into history anyways. This does make management of the object
+  // and devices a bit odd, but this is a sex toy library for an interactive
+  // fiction engine. We started at odd and headed outward from there.
+	let bpClient;
+
   Macro.add("buttplugloaded", {
     tags: null,
     handler() {
@@ -167,17 +176,69 @@ var saveAs=saveAs||navigator.msSaveBlob&&navigator.msSaveBlob.bind(navigator)||f
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
       // TODO Let user name client as argument
-      let bp = new Buttplug.ButtplugClient("Twine Buttplug Client");
+      State.variables.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
+		  bpClient = State.variables.bpClient;
+
       try {
-        await bp.ConnectLocal();
+        await bpClient.ConnectLocal();
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
         Wikifier.wikifyEval(payloadMap.get("failure").contents);
       }
     }
   });
-})();
-</script><tw-passagedata pid="1" name="Introduction" tags="" position="100,500" size="100,100">Hi! Welcome to the Buttplug Twine Example Story.
+
+  Macro.add("buttplugstartscanning", {
+    async handler() {
+      if (bpClient === undefined) {
+        throw new Error("Trying to run scan without a connection!");
+      }
+      await bpClient.StartScanning();
+    }
+  });
+
+  Macro.add("buttplugstopscanning", {
+    async handler() {
+      if (bpClient === undefined) {
+        throw new Error("Trying to run scan without a connection!");
+      }
+      await bpClient.StopScanning();
+    }
+  });
+
+  Macro.add("buttplugdeviceadded", {
+		tags: null,
+    handler() {
+      if (bpClient === undefined) {
+        throw new Error("We need a client object!");
+      }
+      bpClient.addListener('deviceadded', (device) => {
+				State.temporary.device = device;
+        Wikifier.wikifyEval(this.payload[0].contents.trim());
+      });
+    }
+  });
+
+  Macro.add("buttplugdeviceremoved", {
+		tags: null,
+    handler() {
+      if (bpClient === undefined) {
+        throw new Error("We need a client object!");
+      }
+      bpClient.addListener('deviceremoved', (device) => {
+        Wikifier.wikifyEval(this.payload[0].contents.trim());
+      });
+    }
+  });
+
+  Macro.add("buttplugdisconnect", {
+		tags: null,
+    handler() {
+      // We currently have no way to detect this. WTF is wrong with me.
+      // https://github.com/metafetish/buttplug-js/issues/64
+    }
+  });
+})();</script><tw-passagedata pid="1" name="Introduction" tags="" position="100,500" size="100,100">Hi! Welcome to the Buttplug Twine Example Story.
 
 We&#39;ll go through the basics of setting up a Buttplug connection, accessing device lists, treating them as inventory, and performing actions on them.
 
@@ -217,11 +278,11 @@ To simplify choices for the user, we can check for the existence of WebBluetooth
 
 To check for bluetooth, we can do something like this:
 
-{{{&lt;&lt;if navigator.bluetooth&gt;&gt;
+{{{&lt;&lt;if navigator.bluetooth&gt;&gt;}}}
 We have bluetooth!
-&lt;&lt;else&gt;&gt;
+{{{&lt;&lt;else&gt;&gt;}}}
 No bluetooth!
-&lt;&lt;/if&gt;&gt;}}}
+{{{&lt;&lt;/if&gt;&gt;}}}
 
 So the verdict for this browser is: &lt;&lt;if navigator.bluetooth&gt;&gt;
 We have bluetooth!
@@ -250,6 +311,25 @@ Time to connect!
 </tw-passagedata><tw-passagedata pid="4" name="Scanning For Devices" tags="" position="550,500" size="100,100">Now that we&#39;re connected to a server, we can start scanning for devices. To start and stop scanning for devices, we use the {{{&lt;buttplugstartscanning&gt;&gt;}}} and {{{buttplugstopscanning}}} macros. Using these macros will also set the {{{$buttplugscanning}}} boolean variable. You can check whether or not scanning is still happening and possibly restrict navigation based on that, so that you don&#39;t get new device notifications later that you have to handle in every passage.
 
 So what happens when the scanner finds a device? This is where things get a little strange. We&#39;ll need Twine to react to events coming from devices asyncronously. We can do this using the {{{&lt;&lt;buttplugdeviceadded&gt;&gt;}}} macro. Whatever commands you put in this macro will be executed every time a &quot;deviceadded&quot; event is received from the Buttplug Server. If you pass nothing to the macro, the event handler will be cleared. Similarly, if you would like to watch for device removal (i.e. someone turned off their bluetooth toy and you want to react accordingly), you&#39;d use the {{{&lt;&lt;buttplugdeviceremoved&gt;&gt;}}} macro.
+
+&lt;&lt;link &quot;Click here to start scanning&quot;&gt;&gt;
+&lt;&lt;buttplugstartscanning&gt;&gt;
+&lt;&lt;removeclass &quot;#devicediv&quot; &quot;hide&quot;&gt;&gt;
+&lt;&lt;/link&gt;&gt;
+
+&lt;&lt;link &quot;Click here to stop scanning&quot;&gt;&gt;
+&lt;&lt;buttplugstopscanning&gt;&gt;
+&lt;&lt;/link&gt;&gt;
+
+&lt;div id=&quot;devicediv&quot; class=&quot;hide&quot;&gt;
+&lt;b&gt;Devices Found:&lt;/b&gt;
+&lt;ul id=&quot;devicelist&quot;&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;&lt;buttplugdeviceadded&gt;&gt;
+&lt;&lt;append &quot;#devicelist&quot;&gt;&gt;&lt;li&gt;_device.Name&lt;/li&gt;&lt;&lt;/append&gt;&gt;
+&lt;&lt;/buttplugdeviceadded&gt;&gt;
 
 Now that you know how to find devices, [[we can talk about what you can do with them|Handling Devices]]!</tw-passagedata><tw-passagedata pid="5" name="Handling Devices" tags="" position="700,500" size="100,100">We&#39;ve scanned for devices, and I&#39;m going to assume we&#39;ve got some listed here.
 
