@@ -86,7 +86,7 @@
   Macro.add("buttplugstartscanning", {
     async handler() {
       if (bpClient === undefined) {
-        throw new Error("Trying to run scan without a connection!");
+        return this.error("Trying to run scan without a connection!");
       }
       await bpClient.StartScanning();
     }
@@ -95,7 +95,7 @@
   Macro.add("buttplugstopscanning", {
     async handler() {
       if (bpClient === undefined) {
-        throw new Error("Trying to run scan without a connection!");
+        return this.error("Trying to run scan without a connection!");
       }
       await bpClient.StopScanning();
     }
@@ -105,7 +105,7 @@
 		tags: null,
     handler() {
       if (bpClient === undefined) {
-        throw new Error("We need a client object!");
+        return this.error("We need a client object!");
       }
       bpClient.addListener('deviceadded', (device) => {
 				State.temporary.device = device;
@@ -118,7 +118,7 @@
 		tags: null,
     handler() {
       if (bpClient === undefined) {
-        throw new Error("We need a client object!");
+        return this.error("We need a client object!");
       }
       bpClient.addListener('deviceremoved', (device) => {
 				State.temporary.device = device;
