@@ -39,6 +39,7 @@
     });
   });
 
+  // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
     let payloadMap = new Map();
     for (let payload of payloads) {
@@ -120,6 +121,7 @@
         throw new Error("We need a client object!");
       }
       bpClient.addListener('deviceremoved', (device) => {
+				State.temporary.device = device;
         Wikifier.wikifyEval(this.payload[0].contents.trim());
       });
     }
