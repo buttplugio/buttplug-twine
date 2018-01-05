@@ -6,3 +6,11 @@ go:
 script:
   - go get bitbucket.org/tmedwards/tweego
   - make
+
+deploy:
+  provider: pages
+  local_dir: build
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
