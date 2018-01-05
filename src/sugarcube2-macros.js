@@ -5,12 +5,12 @@
 (() => {
   'use strict';
 
-  let buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.0/dist/web/buttplug.min.js');
+  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.0/dist/web/buttplug.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
-    let payloadMap = new Map();
-    for (let payload of payloads) {
+    const payloadMap = new Map();
+    for (const payload of payloads) {
       payloadMap.set(payload.name, payload);
     }
     return payloadMap;
@@ -35,7 +35,7 @@
   Macro.add("buttplugconnectlocal", {
     tags: ["connecting", "success", "failure"],
     async handler() {
-      let payloadMap = mapPayloads(this.payload);
+      const payloadMap = mapPayloads(this.payload);
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
       // TODO Let user name client as argument
