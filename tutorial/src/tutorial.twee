@@ -88,7 +88,7 @@ Time to connect!
 
 :: Scanning For Devices
 
-Now that we're connected to a server, we can start scanning for devices. To start and stop scanning for devices, we use the {{{<buttplugstartscanning>>}}} and {{{buttplugstopscanning}}} macros. Using these macros will also set the {{{$buttplugscanning}}} boolean variable. You can check whether or not scanning is still happening and possibly restrict navigation based on that, so that you don't get new device notifications later that you have to handle in every passage.
+Now that we're connected to a server, we can start scanning for devices. To start and stop scanning for devices, we use the {{{<<buttplugstartscanning>>}}} and {{{<<buttplugstopscanning>>}}} macros. Using these macros will also set the {{{$buttplugscanning}}} boolean variable. You can check whether or not scanning is still happening and possibly restrict navigation based on that, so that you don't get new device notifications later that you have to handle in every passage.
 
 So what happens when the scanner finds a device? This is where things get a little strange. We'll need Twine to react to events coming from devices asyncronously. We can do this using the {{{<<buttplugdeviceadded>>}}} macro. Whatever commands you put in this macro will be executed every time a "deviceadded" event is received from the Buttplug Server. If you pass nothing to the macro, the event handler will be cleared. Similarly, if you would like to watch for device removal (i.e. someone turned off their bluetooth toy and you want to react accordingly), you'd use the {{{<<buttplugdeviceremoved>>}}} macro.
 
