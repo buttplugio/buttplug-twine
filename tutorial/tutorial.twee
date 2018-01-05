@@ -1,0 +1,180 @@
+:: StoryTitle
+
+Buttplug-Twine Tutorial
+
+:: StorySettings
+
+ifid:e92d3b47-9b00-4fb9-b696-a6b81d213c34
+
+:: Start
+
+Hi! Welcome to the Buttplug Twine Example Story.
+
+We'll go through the basics of setting up a Buttplug connection,
+accessing device lists, treating them as inventory, and performing
+actions on them.
+
+One of the odd parts about interacting with hardware in twine is that
+it can, and will, disappear and reappear randomly. You are basically
+banking your story on the reliability of Bluetooth. How you integrate
+this eccentricity into your story is up to you, but we'll try to cover
+the technical requirements and leave the creativity to you.
+
+<span id="waitlink">Wait just a moment while we load the Buttplug Library...</span>
+
+<span id="introlink" class="hide">If you're ready, [[let's begin.|Library Loading]]</span>
+
+<<buttplugloaded>>
+	<<addclass "#waitlink" "hide">>
+	<<removeclass "#introlink" "hide">>
+<</buttplugloaded>>
+
+:: Library Loading
+
+The first thing you're going to need to do is include the Buttplug
+library.
+
+Luckily, we make that available as part of our [[Buttplug npm package|https://www.npmjs.com/package/buttplug]]. This file can either
+be accessed via an NPM CDN, or just directly integrated with your
+Twine story.
+
+If you load this example into the Twine editor and check out the
+"Story Javascript" portion, you can see that we use a loader that
+executes when the story is loaded. You will need to wait for the
+library to load before using it. Luckily, we have a macro for that!
+
+The {{{<<buttplugloaded>>}}} macro allows you to run macros after the
+library has loaded. For instance, in the start passage, we have:
+
+{{{<<buttplugloaded>>
+	<<addclass "#waitlink" "hide">>
+	<<removeclass "#introlink" "hide">>
+<</buttplugloaded>>}}}
+
+This macro uses CSS to switch from a "waiting" message to a "let's
+begin" message after we know the library is ready to go.
+
+Now that we can load the library, let's talk about
+[[connecting!|Connecting]]
+
+:: Connecting
+
+Library is loaded, so now it's time to connect to a server!
+
+There's two ways we can do this:
+
+* Local, which means running a server in the browser. At the moment, this is really only useful for Chrome on Mac/Linux/Android/ChromeOS, which has WebBluetooth. This means we can access bluetooth devices through JS APIs in the browser.
+* WebSocket, which means connecting to a native outside server running on the user's computer. At the moment, this is how we support Windows.
+
+To simplify choices for the user, we can check for the existence of
+WebBluetooth in the browser. If we can access it, it's probably
+easiest to do a local connect. Otherwise, we need to have them connect
+via Websocket. While you can try to recommend a user go
+Local/Websocket, it's best to leave a way for the user to select one,
+just in case they had needs you can't predict.
+
+To check for bluetooth, we can do something like this:
+
+{{{<<if navigator.bluetooth>>}}}
+We have bluetooth!
+{{{<<else>>}}}
+No bluetooth!
+{{{<</if>>}}}
+
+So the verdict for this browser is: <<if navigator.bluetooth>>
+We have bluetooth!
+<<else>>
+No bluetooth!
+<</if>>
+
+Time to connect!
+
+<<link "Click here to connect locally">>
+<<buttplugconnectlocal>>
+<<connecting>>
+<<removeclass "#connector" "hide">>
+<<success>>
+<<addclass "#connector" "hide">>
+<<removeclass "#success" "hide">>
+<<failure>>
+<<addclass "#connector" "hide">>
+<<removeclass "#failure" "hide">>
+<</buttplugconnectlocal>>
+<</link>>
+<<link "Click here to connect via websocket">><</link>>
+<span id="connector" class="hide">Now trying to connect</span>
+<span id="success" class="hide">Connection succeeded! [[Now we can start looking for devices.|Scanning For Devices]]</span>
+<span id="failure" class="hide">Connection failed!</span>
+
+:: Scanning For Devices
+
+Now that we're connected to a server, we can start scanning for
+devices. To start and stop scanning for devices, we use the
+{{{<buttplugstartscanning>>}}} and {{{buttplugstopscanning}}} macros.
+Using these macros will also set the {{{$buttplugscanning}}} boolean
+variable. You can check whether or not scanning is still happening and
+possibly restrict navigation based on that, so that you don't get new
+device notifications later that you have to handle in every passage.
+
+So what happens when the scanner finds a device? This is where things
+get a little strange. We'll need Twine to react to events coming from
+devices asyncronously. We can do this using the
+{{{<<buttplugdeviceadded>>}}} macro. Whatever commands you put in this
+macro will be executed every time a "deviceadded" event is received
+from the Buttplug Server. If you pass nothing to the macro, the event
+handler will be cleared. Similarly, if you would like to watch for
+device removal (i.e. someone turned off their bluetooth toy and you
+want to react accordingly), you'd use the
+{{{<<buttplugdeviceremoved>>}}} macro.
+
+<<link "Click here to start scanning">>
+<<buttplugstartscanning>>
+<<removeclass "#devicediv" "hide">>
+<</link>>
+
+<<link "Click here to stop scanning">>
+<<buttplugstopscanning>>
+<</link>>
+
+<div id="devicediv" class="hide">
+<b>Devices Found:</b>
+<ul id="devicelist">
+</ul>
+</div>
+
+<<buttplugdeviceadded>>
+<<append "#devicelist">><li>_device.Name</li><</append>>
+<</buttplugdeviceadded>>
+
+Now that you know how to find devices, [[we can talk about what you
+can do with them|Handling Devices]]!
+
+:: Handling Devices
+
+Now that we have some devices to work with, let's make them do something!
+
+[[Done|Finishing Up]]
+
+:: Finishing Up
+
+That's all there is to it! You now know how to connect to a server,
+find devices, and control them. [[We've got a few more tips and tricks
+available that you might want to check out.|Tips and Tricks]]
+
+:: Tips and Tricks
+
+[[You are now a Buttplug Twine Guru.|Conclusion]]
+
+:: Conclusion
+
+Thanks for checking out our tutorial!
+
+If you've got any questions, we've got a few resources available for you.
+
+* [[You can post on our message boards at metafetish.club|https://metafetish.club]]
+* If you find bugs or need more features in the library, [[you can post an issue on our github repo|https://github.com/metafetish/buttplug-twine]]. You can also post those on the message board.
+* We have a [[discord server with open invites!|https://discord.gg/BGNjpbf]]
+
+[[We also have a patreon campaign|https://patreon.com/qdot]] if you'd like to help out with the upkeep/maintenance costs and our hardware research budget (we have to buy and reverse engineer toys to add them to the library). Every donation helps!
+
+Thanks, and happy buttplugging!
