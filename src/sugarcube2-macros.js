@@ -4,40 +4,8 @@
 */
 (() => {
   'use strict';
-  window.requestScriptLoad = function (options) {
-    if (options == null || typeof options !== 'object' || !options.src) {
-      return;
-    }
 
-    var
-    opts   = Object.assign({ parent : document.head }, options),
-    script = document.createElement('script');
-
-    function onLoadOnce(evt) {
-      opts.onload.call(evt.target, evt);
-      script.removeEventListener('load', onLoadOnce);
-    }
-
-    script.id   = opts.id;
-    script.src  = opts.src;
-    script.type = 'text/javascript';
-
-    if (typeof opts.onload === 'function') {
-      script.addEventListener('load', onLoadOnce, false);
-    }
-
-    opts.parent.appendChild(script);
-  };
-
-  let buttplugLoadingPromise = new Promise((resolve, reject) => {
-    requestScriptLoad({
-      id     : 'lib-buttplug-js',
-      src    : 'https://cdn.jsdelivr.net/npm/buttplug@0.4.0/dist/web/buttplug.min.js',
-      onload : function (evt) {
-        resolve();
-      }
-    });
-  });
+  let buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.0/dist/web/buttplug.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
