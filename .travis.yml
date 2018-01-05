@@ -5,11 +5,12 @@ go:
 
 script:
   - go get bitbucket.org/tmedwards/tweego
+  - cd tutorial
   - make
 
 deploy:
   provider: pages
-  local_dir: build
+  local_dir: tutorial/build
   skip_cleanup: true
   github_token: $GITHUB_TOKEN
   on:

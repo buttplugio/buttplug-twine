@@ -6,16 +6,11 @@ Control Protocol](https://github.com/metafetish/buttplug) with the
 
 ## Table Of Contents
 
-- [Support The Project](#support-the-project)
 - [Buttplug](#buttplug)
 - [Installation](#installation)
+- [Tutorial](#tutorial)
+- [Support The Project](#support-the-project)
 - [License](#license)
-
-## Support The Project
-
-If you find this project helpful, you can [support Metafetish projects
-via Patreon](http://patreon.com/qdot)! Every donation helps us afford
-more hardware to reverse, document, and write code for!
 
 ## Buttplug
 
@@ -31,12 +26,25 @@ library implementations and other applications using the protocol.
 
 For the moment, most of the files in this repo will require direct
 integration into your twine project. You can either check the repo
-out, or just cut/paste code and macros as needed.
+out, or just cut/paste code and macros out of the relevant file in the
+src directory as needed.
 
-## Examples
+## Tutorial
 
-An example using Twine v2 with Sugarcube v2 is available in the
-example directory.
+A tutorial on using buttplug-twine with Twine v2 with Sugarcube v2 is
+available at:
+
+https://metafetish.github.io/buttplug-twine
+
+The code for this tutorial is in the tutorial directory, and can be
+built with [tweego](https://bitbucket.org/tmedwards/tweego) using the
+provided Makefile.
+
+## Support The Project
+
+If you find this project helpful, you can [support Metafetish projects
+via Patreon](http://patreon.com/qdot)! Every donation helps us afford
+more hardware to reverse, document, and write code for!
 
 ## License
 
