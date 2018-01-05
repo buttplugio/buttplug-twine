@@ -5,7 +5,6 @@ go:
 
 script:
   - go get bitbucket.org/tmedwards/tweego
-  - cd tutorial
   - make
 
 deploy:
