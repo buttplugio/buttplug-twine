@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.1/dist/web/buttplug.min.js');
+  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.2/dist/web/buttplug.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
