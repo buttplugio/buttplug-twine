@@ -50,6 +50,7 @@
       try {
         await bpClient.ConnectLocal();
         bpClient.addListener('deviceadded', deviceAddedCallback);
+        // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
         Wikifier.wikifyEval(payloadMap.get("failure").contents);
@@ -73,6 +74,7 @@
         // Websocket servers may keep state between connections, meaning we
         // should fetch devices now.
         await bpClient.RequestDeviceList();
+        // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
         Wikifier.wikifyEval(payloadMap.get("failure").contents);
@@ -130,8 +132,91 @@
       bpClient.disconnect();
       bpClient = undefined;
       setup.bpDevices = [];
-      // We currently have no way to detect this. WTF is wrong with me.
-      // https://github.com/metafetish/buttplug-js/issues/64
+      // TODO Detect disconnect event, store/run wikified block.
+    }
+  });
+
+  const CheckDeviceMessageMacro = function (args,
+                                            expectedLength,
+                                            expectedMsg) {
+    if (args.length < expectedLength) {
+      return this.error(`Expected ${expectedLength} arguments, got ${args.length}`);
+    }
+    const device = args[0];
+    if (device === undefined ||
+        device.AllowedMessages === undefined) {
+      return this.error("Device object (first argument) is not valid!");
+    }
+    if (device.AllowedMessages === undefined ||
+        device.AllowedMessages.indexOf(expectedMsg) === -1) {
+      return this.error("Device is not capable of running command " + expectedMsg);
+    }
+    return null;
+  };
+
+  const SendDeviceMessage = async function(device, msg) {
+    try {
+      await bpClient.SendDeviceMessage(device, msg);
+      // TODO: Fire success
+    } catch (e) {
+      // TODO: Fire failure
+      return this.error(e);
+    }
+    return null;
+  };
+
+  Macro.add("buttplugvibrate", {
+		tags: ["success", "failure"],
+    async handler() {
+      let err = CheckDeviceMessageMacro(this.args, 2, "SingleMotorVibrateCmd");
+      if (err !== null) {
+        return err;
+      }
+      const payloadMap = mapPayloads(this.payload);
+      const device = this.args[0];
+      const speed = this.args[1];
+      if (typeof speed !== "number" || speed < 0 || speed > 1) {
+        return this.error("Vibrate speed should be a number between 0.0 and 1.0");
+      }
+
+      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
+    }
+  });
+
+  Macro.add("buttpluglinear", {
+		tags: ["success", "failure"],
+    async handler() {
+      // Args: device, position, time
+      let err = CheckDeviceMessageMacro(this.args, 3, "FleshlightLaunchFW12Cmd");
+      if (err !== null) {
+        return err;
+      }
+      const payloadMap = mapPayloads(this.payload);
+      const device = this.args[0];
+      const speed = this.args[1];
+      if (typeof speed !== "number" || speed < 0 || speed > 1) {
+        return this.error("Vibrate speed should be a number between 0.0 and 1.0");
+      }
+
+      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
+    }
+  });
+
+  Macro.add("buttplugrotate", {
+		tags: ["success", "failure"],
+    async handler() {
+      let err = CheckDeviceMessageMacro(this.args, 2, "SingleMotorVibrateCmd");
+      if (err !== null) {
+        return err;
+      }
+      const payloadMap = mapPayloads(this.payload);
+      const device = this.args[0];
+      const speed = this.args[1];
+      if (typeof speed !== "number" || speed < 0 || speed > 1) {
+        return this.error("Vibrate speed should be a number between 0.0 and 1.0");
+      }
+
+      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
     }
   });
 })();
