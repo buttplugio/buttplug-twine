@@ -97,6 +97,18 @@
     }
   });
 
+  Macro.add("buttplugscanningfinished", {
+		tags: null,
+    handler() {
+      if (bpClient === undefined) {
+        return this.error("We need a client object!");
+      }
+      bpClient.addListener('scanningfinished', () => {
+        Wikifier.wikifyEval(this.payload[0].contents.trim());
+      });
+    }
+  });
+
   Macro.add("buttplugdeviceadded", {
 		tags: null,
     handler() {
