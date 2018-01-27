@@ -5,7 +5,7 @@
 (() => {
   'use strict';
 
-  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.4.2/dist/web/buttplug.min.js');
+  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.5.2/dist/web/buttplug.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
@@ -69,11 +69,8 @@
 		  bpClient = setup.bpClient;
 
       try {
-        await bpClient.ConnectWebsocket("wss://192.168.123.2:12345/buttplug");
         bpClient.addListener('deviceadded', deviceAddedCallback);
-        // Websocket servers may keep state between connections, meaning we
-        // should fetch devices now.
-        await bpClient.RequestDeviceList();
+        await bpClient.ConnectWebsocket("wss://192.168.123.2:12345/buttplug");
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
