@@ -145,87 +145,82 @@
     }
   });
 
-  const CheckDeviceMessageMacro = function (args,
+  const CheckDeviceMessageMacro = function (macro,
+                                            args,
                                             expectedLength,
                                             expectedMsg) {
     if (args.length < expectedLength) {
-      return this.error(`Expected ${expectedLength} arguments, got ${args.length}`);
+      return macro.error(`Expected ${expectedLength} arguments, got ${args.length}`);
     }
     const device = args[0];
     if (device === undefined ||
         device.AllowedMessages === undefined) {
-      return this.error("Device object (first argument) is not valid!");
+      return macro.error("Device object (first argument) is not valid!");
     }
     if (device.AllowedMessages === undefined ||
         device.AllowedMessages.indexOf(expectedMsg) === -1) {
-      return this.error("Device is not capable of running command " + expectedMsg);
+      return macro.error("Device is not capable of running command " + expectedMsg);
     }
     return null;
   };
 
-  const SendDeviceMessage = async function(device, msg) {
+  const SendDeviceMessage = async function (macro, device, msg) {
+    //const payloadMap = mapPayloads(this.payload);
     try {
       await bpClient.SendDeviceMessage(device, msg);
       // TODO: Fire success
     } catch (e) {
       // TODO: Fire failure
-      return this.error(e);
+      console.log(e);
+      return macro.error(e);
     }
     return null;
   };
 
-  Macro.add("buttplugvibrate", {
+  Macro.add("buttplugsinglemotorvibrate", {
 		tags: ["success", "failure"],
     async handler() {
-      let err = CheckDeviceMessageMacro(this.args, 2, "SingleMotorVibrateCmd");
+      let err = CheckDeviceMessageMacro(this, this.args, 2, "SingleMotorVibrateCmd");
       if (err !== null) {
         return err;
       }
-      const payloadMap = mapPayloads(this.payload);
       const device = this.args[0];
       const speed = this.args[1];
       if (typeof speed !== "number" || speed < 0 || speed > 1) {
         return this.error("Vibrate speed should be a number between 0.0 and 1.0");
       }
 
-      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
+      return await SendDeviceMessage(this, device, new Buttplug.SingleMotorVibrateCmd(speed));
     }
   });
 
-  Macro.add("buttpluglinear", {
+  Macro.add("buttplugfleshlightlaunchfw12", {
 		tags: ["success", "failure"],
     async handler() {
       // Args: device, position, time
-      let err = CheckDeviceMessageMacro(this.args, 3, "FleshlightLaunchFW12Cmd");
+      let err = CheckDeviceMessageMacro(this, this.args, 3, "FleshlightLaunchFW12Cmd");
       if (err !== null) {
         return err;
       }
-      const payloadMap = mapPayloads(this.payload);
       const device = this.args[0];
       const speed = this.args[1];
-      if (typeof speed !== "number" || speed < 0 || speed > 1) {
-        return this.error("Vibrate speed should be a number between 0.0 and 1.0");
+      const position = this.args[2];
+      if (typeof speed !== "number" || speed < 0 || speed > 99) {
+        return this.error("Fleshlight speed should be a number between 0 and 99");
+      }
+      if (typeof position !== "number" || position < 0 || position > 99) {
+        return this.error("Fleshlight speed should be a number between 0 and 99");
       }
 
-      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
+      return await SendDeviceMessage(this, device, new Buttplug.FleshlightLaunchFW12Cmd(speed, position));
     }
   });
 
-  Macro.add("buttplugrotate", {
-		tags: ["success", "failure"],
-    async handler() {
-      let err = CheckDeviceMessageMacro(this.args, 2, "SingleMotorVibrateCmd");
-      if (err !== null) {
-        return err;
-      }
-      const payloadMap = mapPayloads(this.payload);
-      const device = this.args[0];
-      const speed = this.args[1];
-      if (typeof speed !== "number" || speed < 0 || speed > 1) {
-        return this.error("Vibrate speed should be a number between 0.0 and 1.0");
-      }
+  Macro.add("buttplugvibrate", {
+  });
+  Macro.add("buttpluglinear", {
+  });
 
-      return await SendDeviceMessage(device, new Buttplug.SingleMotorVibrateCmd(speed));
-    }
+  Macro.add("buttplugrotate", {
   });
 })();
