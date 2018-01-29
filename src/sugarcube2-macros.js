@@ -19,7 +19,7 @@
   // serialized into history anyways. This does make management of the object
   // and devices a bit odd, but this is a sex toy library for an interactive
   // fiction engine. We started at odd and headed outward from there.
-	let bpClient = null;
+	let bpClient;
   setup.bpDevices = [];
 
   Macro.add("buttplugloaded", {
