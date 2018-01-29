@@ -2,6 +2,7 @@
   'use strict';
 
   const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.5.2/dist/web/buttplug.min.js');
+  const buttplugDevtoolsLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.5.2/dist/web/buttplug-devtools.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
@@ -19,13 +20,27 @@
   // serialized into history anyways. This does make management of the object
   // and devices a bit odd, but this is a sex toy library for an interactive
   // fiction engine. We started at odd and headed outward from there.
-	let bpClient;
+	let bpClient = null;
   setup.bpDevices = [];
 
   Macro.add("buttplugloaded", {
     tags: null,
+    async handler() {
+      await buttplugLoadingPromise;
+      await buttplugDevtoolsLoadingPromise;
+      Wikifier.wikifyEval(this.payload[0].contents.trim());
+    }
+  });
+
+  Macro.add("buttplugdevtoolsshowlog", {
     handler() {
-      buttplugLoadingPromise.then(() => Wikifier.wikifyEval(this.payload[0].contents.trim()));
+      ButtplugDevTools.CreateLoggerPanel(Buttplug.ButtplugLogger.Logger);
+    }
+  });
+
+  Macro.add("buttplugdevtoolsshowdevices", {
+    handler() {
+      ButtplugDevTools.CreateDeviceManagerPanel();
     }
   });
 
@@ -67,6 +82,28 @@
       try {
         bpClient.addListener('deviceadded', deviceAddedCallback);
         await bpClient.ConnectWebsocket("wss://localhost:12345/buttplug");
+        // TODO: Check to see if we actually have success/failure tags
+        Wikifier.wikifyEval(payloadMap.get("success").contents);
+      } catch (e) {
+        Wikifier.wikifyEval(payloadMap.get("failure").contents);
+      }
+    }
+  });
+
+  Macro.add("buttplugconnectdevtools", {
+    tags: ["connecting", "success", "failure"],
+    async handler() {
+      const payloadMap = mapPayloads(this.payload);
+      // Run the connecting block before actually trying to connect
+      Wikifier.wikifyEval(payloadMap.get("connecting").contents);
+
+      try {
+        setup.bpClient = await ButtplugDevTools.CreateDevToolsClient(Buttplug.ButtplugLogger.Logger);
+		    bpClient = setup.bpClient;
+        // Devtools doesn't connect devices until either specific connection
+        // functions or startscanning is called, so adding this after the client
+        // bringup is fine.
+        bpClient.addListener('deviceadded', deviceAddedCallback);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
@@ -214,6 +251,7 @@
 
   Macro.add("buttplugvibrate", {
   });
+
   Macro.add("buttpluglinear", {
   });
 
