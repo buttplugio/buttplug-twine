@@ -1,7 +1,3 @@
-/*
-  External script loading module.
-  Taken from https://twinery.org/forum/discussion/6628/sugarcube-2-9-0-including-external-javascript-libraries
-*/
 (() => {
   'use strict';
 
