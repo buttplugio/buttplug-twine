@@ -46,6 +46,11 @@
     setup.bpDevices.push(device);
   };
 
+  const deviceRemovedCallback = (device) => {
+    const i = setup.bpDevices.indexOf(device);
+    setup.bpDevices.splice(i, 1);
+  };
+
   Macro.add("buttplugconnectlocal", {
     tags: ["connecting", "success", "failure"],
     async handler() {
@@ -59,6 +64,7 @@
       try {
         await bpClient.ConnectLocal();
         bpClient.addListener('deviceadded', deviceAddedCallback);
+        bpClient.addListener('deviceremoved', deviceRemovedCallback);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
@@ -79,6 +85,7 @@
 
       try {
         bpClient.addListener('deviceadded', deviceAddedCallback);
+        bpClient.addListener('deviceremoved', deviceRemovedCallback);
         await bpClient.ConnectWebsocket("wss://localhost:12345/buttplug");
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
@@ -102,6 +109,7 @@
         // functions or startscanning is called, so adding this after the client
         // bringup is fine.
         bpClient.addListener('deviceadded', deviceAddedCallback);
+        bpClient.addListener('deviceremoved', deviceRemovedCallback);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
