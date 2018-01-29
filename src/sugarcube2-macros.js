@@ -66,7 +66,7 @@
 
       try {
         bpClient.addListener('deviceadded', deviceAddedCallback);
-        await bpClient.ConnectWebsocket("wss://192.168.123.2:12345/buttplug");
+        await bpClient.ConnectWebsocket("wss://localhost:12345/buttplug");
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
