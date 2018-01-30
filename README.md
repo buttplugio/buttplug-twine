@@ -9,6 +9,7 @@ Control Protocol](https://github.com/metafetish/buttplug) with the
 - [Buttplug](#buttplug)
 - [Installation](#installation)
 - [Tutorial](#tutorial)
+- [Projects Using buttplug-twine](#projects-using-buttplug-twine)
 - [Support The Project](#support-the-project)
 - [License](#license)
 
@@ -40,7 +41,7 @@ The code for this tutorial is in the tutorial directory, and can be
 built with [tweego](https://bitbucket.org/tmedwards/tweego) using the
 provided Makefile.
 
-## Projects using buttplug-twine
+## Projects Using buttplug-twine
 
 - [Buttplug
   Tutorial](https://github.com/metafetish/buttplug-tutorial) -
