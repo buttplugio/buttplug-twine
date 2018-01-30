@@ -40,6 +40,14 @@ The code for this tutorial is in the tutorial directory, and can be
 built with [tweego](https://bitbucket.org/tmedwards/tweego) using the
 provided Makefile.
 
+## Projects using buttplug-twine
+
+- [Buttplug
+  Tutorial](https://github.com/metafetish/buttplug-tutorial) -
+  buttplug-twine was built as the base of the tutorial system for
+  setting up the Buttplug Application suite. We're not just the
+  developers, we're also users!
+
 ## Support The Project
 
 If you find this project helpful, you can [support Metafetish projects
