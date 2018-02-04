@@ -76,6 +76,9 @@
   Macro.add("buttplugconnectwebsocket", {
     tags: ["connecting", "success", "failure"],
     async handler() {
+      if (this.args == undefined || this.args.length < 1) {
+        return macro.error(`Expected ${expectedLength} arguments, got ${this.args.length}`);
+      }
       const payloadMap = mapPayloads(this.payload);
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
@@ -86,7 +89,7 @@
       try {
         bpClient.addListener('deviceadded', deviceAddedCallback);
         bpClient.addListener('deviceremoved', deviceRemovedCallback);
-        await bpClient.ConnectWebsocket("wss://localhost:12345/buttplug");
+        await bpClient.ConnectWebsocket(this.args[0]);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
