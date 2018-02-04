@@ -12,15 +12,17 @@
     return payloadMap;
   }
 
-  // The Buttplug Client needs to live in macro definition scope (basically, as
-  // a private scope variable), but not in Twine State scope. Adding it as part
-  // of State.variables causes weird things to happen between passages and event
-  // listeners to not register correctly, and the client object shouldn't be
-  // serialized into history anyways. This does make management of the object
-  // and devices a bit odd, but this is a sex toy library for an interactive
-  // fiction engine. We started at odd and headed outward from there.
-	let bpClient;
-  setup.bpDevices = [];
+  const disconnectClient = () => {
+    if (setup.bpClient === undefined) {
+      return;
+    }
+    // We should do this in the buttplug library probably
+    setup.bpClient.removeAllListeners("deviceadded");
+    setup.bpClient.removeAllListeners("deviceremoved");
+    setup.bpClient.removeAllListeners("scanningfinished");
+    setup.bpClient.Disconnect();
+    setup.bpClient = undefined;
+  };
 
   Macro.add("buttplugloaded", {
     tags: null,
@@ -42,29 +44,23 @@
     }
   });
 
-  const deviceAddedCallback = (device) => {
-    setup.bpDevices.push(device);
-  };
-
-  const deviceRemovedCallback = (device) => {
-    const i = setup.bpDevices.indexOf(device);
-    setup.bpDevices.splice(i, 1);
+  const teardownClient = () => {
+    if (setup.bpClient !== undefined) {
+    }
   };
 
   Macro.add("buttplugconnectlocal", {
     tags: ["connecting", "success", "failure"],
     async handler() {
+      disconnectClient();
       const payloadMap = mapPayloads(this.payload);
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
       // TODO Let user name client as argument
       setup.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
-		  bpClient = setup.bpClient;
 
       try {
-        await bpClient.ConnectLocal();
-        bpClient.addListener('deviceadded', deviceAddedCallback);
-        bpClient.addListener('deviceremoved', deviceRemovedCallback);
+        await setup.bpClient.ConnectLocal();
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
@@ -79,17 +75,15 @@
       if (this.args == undefined || this.args.length < 1) {
         return macro.error(`Expected ${expectedLength} arguments, got ${this.args.length}`);
       }
+      disconnectClient();
       const payloadMap = mapPayloads(this.payload);
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
       // TODO Let user name client as argument
       setup.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
-		  bpClient = setup.bpClient;
 
       try {
-        bpClient.addListener('deviceadded', deviceAddedCallback);
-        bpClient.addListener('deviceremoved', deviceRemovedCallback);
-        await bpClient.ConnectWebsocket(this.args[0]);
+        await setup.bpClient.ConnectWebsocket(this.args[0]);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
@@ -101,18 +95,14 @@
   Macro.add("buttplugconnectdevtools", {
     tags: ["connecting", "success", "failure"],
     async handler() {
+      disconnectClient();
       const payloadMap = mapPayloads(this.payload);
       // Run the connecting block before actually trying to connect
       Wikifier.wikifyEval(payloadMap.get("connecting").contents);
 
       try {
         setup.bpClient = await ButtplugDevTools.CreateDevToolsClient(Buttplug.ButtplugLogger.Logger);
-		    bpClient = setup.bpClient;
-        // Devtools doesn't connect devices until either specific connection
-        // functions or startscanning is called, so adding this after the client
-        // bringup is fine.
-        bpClient.addListener('deviceadded', deviceAddedCallback);
-        bpClient.addListener('deviceremoved', deviceRemovedCallback);
+
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
@@ -121,68 +111,72 @@
     }
   });
 
+  Macro.add("buttplugdisconnect", {
+    handler() {
+      disconnectClient();
+      // TODO Detect disconnect event, store/run wikified block.
+    }
+  });
+
   Macro.add("buttplugstartscanning", {
     async handler() {
-      if (bpClient === undefined) {
+      if (setup.bpClient === undefined) {
         return this.error("Trying to run scan without a connection!");
       }
-      await bpClient.StartScanning();
+      await setup.bpClient.StartScanning();
     }
   });
 
   Macro.add("buttplugstopscanning", {
     async handler() {
-      if (bpClient === undefined) {
+      if (setup.bpClient === undefined) {
         return this.error("Trying to run scan without a connection!");
       }
-      await bpClient.StopScanning();
+      await setup.bpClient.StopScanning();
     }
   });
 
-  Macro.add("buttplugscanningfinished", {
+  Macro.add("buttplugscanningfinishedhandler", {
 		tags: null,
     handler() {
-      if (bpClient === undefined) {
+      if (setup.bpClient === undefined) {
         return this.error("We need a client object!");
       }
-      bpClient.addListener('scanningfinished', () => {
+      setup.bpClient.addListener('scanningfinished', () => {
         Wikifier.wikifyEval(this.payload[0].contents.trim());
       });
     }
   });
 
-  Macro.add("buttplugdeviceadded", {
+  Macro.add("buttplugdeviceaddedhandler", {
 		tags: null,
     handler() {
-      if (bpClient === undefined) {
+      if (setup.bpClient === undefined) {
         return this.error("We need a client object!");
       }
-      bpClient.addListener('deviceadded', (device) => {
+      setup.bpClient.addListener('deviceadded', (device) => {
         State.temporary.device = device;
         Wikifier.wikifyEval(this.payload[0].contents.trim());
       });
     }
   });
 
-  Macro.add("buttplugdeviceremoved", {
+  Macro.add("buttplugdeviceremovedhandler", {
 		tags: null,
     handler() {
-      if (bpClient === undefined) {
+      if (setup.bpClient === undefined) {
         return this.error("We need a client object!");
       }
-      bpClient.addListener('deviceremoved', (device) => {
+      setup.bpClient.addListener('deviceremoved', (device) => {
 				State.temporary.device = device;
         Wikifier.wikifyEval(this.payload[0].contents.trim());
       });
     }
   });
 
-  Macro.add("buttplugdisconnect", {
+  Macro.add("buttplugdisconnecthandler", {
 		tags: null,
     handler() {
-      bpClient.disconnect();
-      bpClient = undefined;
-      setup.bpDevices = [];
       // TODO Detect disconnect event, store/run wikified block.
     }
   });
@@ -209,7 +203,7 @@
   const SendDeviceMessage = async function (macro, device, msg) {
     //const payloadMap = mapPayloads(this.payload);
     try {
-      await bpClient.SendDeviceMessage(device, msg);
+      await setup.bpClient.SendDeviceMessage(device, msg);
       // TODO: Fire success
     } catch (e) {
       // TODO: Fire failure
