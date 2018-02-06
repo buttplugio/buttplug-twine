@@ -39,9 +39,27 @@
     }
   });
 
-  Macro.add("buttplugdevtoolsshowdevices", {
+  Macro.add("buttplugdevtoolsshowdevicepanel", {
     handler() {
-      ButtplugDevTools.CreateDeviceManagerPanel();
+      if (setup.bpClient === undefined) {
+        return;
+      }
+      try {
+        ButtplugDevTools.CreateDeviceManagerPanel(setup.bpClient.Connector.Server);
+      } catch (e) {
+        // We should do something more than catch and console here, but I'm not
+        // quite sure what.
+        console.log("Can't create device manager panel, as server doesn't have a test device manager");
+      }
+    }
+  });
+
+  Macro.add("buttplugdevtoolsclosedevicepanel", {
+    handler() {
+      const panelElement = document.getElementById("buttplug-test-device-manager-panel");
+      if (panelElement !== null) {
+        panelElement.remove();
+      }
     }
   });
 
