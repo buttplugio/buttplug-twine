@@ -21,7 +21,9 @@
     setup.bpClient.removeAllListeners("deviceadded");
     setup.bpClient.removeAllListeners("deviceremoved");
     setup.bpClient.removeAllListeners("scanningfinished");
-    setup.bpClient.Disconnect();
+    if (setup.bpClient.Connected) {
+      setup.bpClient.Disconnect();
+    }
     setup.bpClient = undefined;
   };
 
