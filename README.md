@@ -23,7 +23,7 @@ Control Protocol](https://github.com/buttplugio/buttplug) with the
 For more information on the Buttplug Sex Toy Control Protocol, visit
 the main repo at
 
-[https://github.com/metafetish/buttplug](https://github.com/buttplugio/buttplug)
+[https://github.com/buttplugio/buttplug](https://github.com/buttplugio/buttplug)
 
 There, you can find more information on the protocol, as well as
 library implementations and other applications using the protocol.
@@ -40,7 +40,7 @@ src directory as needed.
 A tutorial on using buttplug-twine with Twine v2 with Sugarcube v2 is
 available at:
 
-https://buttplugio.github.io/buttplug-twine
+[https://buttplug-twine-tutorial.docs.buttplug.io](https://buttplug-twine-tutorial.docs.buttplug.io)
 
 Building the tutorial requires
 [tweego](https://bitbucket.org/tmedwards/tweego), which in turn will
@@ -68,9 +68,9 @@ build the tutorial into the "build" directory.
 
 ## Support The Project
 
-If you find this project helpful, you can [support Metafetish projects
-via Patreon](http://patreon.com/qdot)! Every donation helps us afford
-more hardware to reverse, document, and write code for!
+If you find this project helpful, you can [support us on
+Patreon](http://patreon.com/qdot)! Every donation helps us afford more
+hardware to reverse, document, and write code for!
 
 ## License
 
