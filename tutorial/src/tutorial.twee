@@ -82,7 +82,18 @@ Time to connect!
 <<removeclass "#failure" "hide">>
 <</buttplugconnectlocal>>
 <</link>>
-<<link "Click here to connect via websocket">><</link>>
+<<link "Click here to connect via websocket">>
+<<buttplugconnectwebsocket "ws://127.0.0.1:12345">>
+<<connecting>>
+<<removeclass "#connector" "hide">>
+<<success>>
+<<addclass "#connector" "hide">>
+<<removeclass "#success" "hide">>
+<<failure>>
+<<addclass "#connector" "hide">>
+<<removeclass "#failure" "hide">>
+<</buttplugconnectwebsocket>>
+<</link>>
 <span id="connector" class="hide">Now trying to connect</span>
 <span id="success" class="hide">Connection succeeded! [[Now we can start looking for devices.|Scanning For Devices]]</span>
 <span id="failure" class="hide">Connection failed!</span>

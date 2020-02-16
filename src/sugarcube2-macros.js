@@ -75,11 +75,12 @@
       setup.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
 
       try {
-        const connector = new Buttplug.ButtplugWebsocketClientConnector(this.args[0]);
+        const connector = new Buttplug.ButtplugBrowserWebsocketClientConnector(this.args[0]);
         await setup.bpClient.Connect(connector);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
+        console.log(e);
         Wikifier.wikifyEval(payloadMap.get("failure").contents);
       }
     }
