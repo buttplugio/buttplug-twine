@@ -142,9 +142,12 @@ Below is a list of your currently connected devices, along with various actions 
 <<if _msg eq "LinearCmd">>
   <li>
   <<link "Click here to move back and forth once">>
-  <<buttpluglinear _device 1.0>><</buttplugvibrate>>
+  <<buttpluglinear _device 0.0 1.0>><</buttpluglinear>>
   <<timed 1s>>
-    <<buttpluglinear _device 0.0>><</buttplugvibrate>>
+    <<buttpluglinear _device 1.0 1.0>><</buttpluglinear>>
+    <<timed 1s>>
+      <<buttpluglinear _device 0.0 1.0>><</buttpluglinear>>
+    <</timed>>
   <</timed>>
   <</link>>
   </li>

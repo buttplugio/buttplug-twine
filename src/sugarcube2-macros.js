@@ -214,7 +214,7 @@
       const device = this.args[0];
       const position = this.args[1];
       const duration = this.args[2];
-      if (typeof duration !== "number" || speed < 0) {
+      if (typeof duration !== "number" || duration < 0) {
         return this.error("Linear speed should be a number greater than 0 (time in milliseconds)");
       }
       if (typeof position !== "number" || position < 0 || position > 1.0) {
