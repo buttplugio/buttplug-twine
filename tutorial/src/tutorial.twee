@@ -2,9 +2,10 @@
 
 Buttplug-Twine Tutorial
 
-:: StorySettings
-
-ifid:e92d3b47-9b00-4fb9-b696-a6b81d213c34
+:: StoryData
+{
+        "ifid": "E92D3B47-9B00-4FB9-B696-A6B81D213C34"
+}
 
 :: Start
 
