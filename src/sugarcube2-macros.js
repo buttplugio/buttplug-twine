@@ -186,23 +186,10 @@
     return null;
   };
 
-  const SendDeviceMessage = async function (macro, device, msg) {
-    //const payloadMap = mapPayloads(this.payload);
-    try {
-      await setup.bpClient.SendDeviceMessage(device, msg);
-      // TODO: Fire success
-    } catch (e) {
-      // TODO: Fire failure
-      console.log(e);
-      return macro.error(e);
-    }
-    return null;
-  };
-
-  Macro.add("buttplugsinglemotorvibrate", {
+  Macro.add("buttplugvibrate", {
 		tags: ["success", "failure"],
     async handler() {
-      let err = CheckDeviceMessageMacro(this, this.args, 2, "SingleMotorVibrateCmd");
+      let err = CheckDeviceMessageMacro(this, this.args, 2, "VibrateCmd");
       if (err !== null) {
         return err;
       }
@@ -212,38 +199,51 @@
         return this.error("Vibrate speed should be a number between 0.0 and 1.0");
       }
 
-      return await SendDeviceMessage(this, device, new Buttplug.SingleMotorVibrateCmd(speed));
+      return await device.SendVibrateCmd(speed);
     }
   });
 
-  Macro.add("buttplugfleshlightlaunchfw12", {
+  Macro.add("buttpluglinear", {
 		tags: ["success", "failure"],
     async handler() {
-      // Args: device, position, time
-      let err = CheckDeviceMessageMacro(this, this.args, 3, "FleshlightLaunchFW12Cmd");
+      // Args: device, position, duration
+      let err = CheckDeviceMessageMacro(this, this.args, 3, "LinearCmd");
+      if (err !== null) {
+        return err;
+      }
+      const device = this.args[0];
+      const position = this.args[1];
+      const duration = this.args[2];
+      if (typeof duration !== "number" || speed < 0) {
+        return this.error("Linear speed should be a number greater than 0 (time in milliseconds)");
+      }
+      if (typeof position !== "number" || position < 0 || position > 1.0) {
+        return this.error("Linear position should be a number between 0.0 and 1.0");
+      }
+
+      return await device.SendLinearCmd(position, duration);
+    }
+  });
+
+  Macro.add("buttplugrotate", {
+		tags: ["success", "failure"],
+    async handler() {
+      // Args: device, speed, clockwise
+      let err = CheckDeviceMessageMacro(this, this.args, 3, "RotateCmd");
       if (err !== null) {
         return err;
       }
       const device = this.args[0];
       const speed = this.args[1];
-      const position = this.args[2];
-      if (typeof speed !== "number" || speed < 0 || speed > 99) {
-        return this.error("Fleshlight speed should be a number between 0 and 99");
+      const clockwise = this.args[2];
+      if (typeof speed !== "number" || speed < 0 || speed > 1.0) {
+        return this.error("Rotation speed should be a number between 0.0 and 1.0");
       }
-      if (typeof position !== "number" || position < 0 || position > 99) {
-        return this.error("Fleshlight speed should be a number between 0 and 99");
+      if (typeof clockwise !== "boolean") {
+        return this.error("Rotation clockwise direction should be a boolean");
       }
-
-      return await SendDeviceMessage(this, device, new Buttplug.FleshlightLaunchFW12Cmd(speed, position));
+      console.log("Sending command!");
+      return await device.SendRotateCmd(speed, clockwise);
     }
-  });
-
-  Macro.add("buttplugvibrate", {
-  });
-
-  Macro.add("buttpluglinear", {
-  });
-
-  Macro.add("buttplugrotate", {
   });
 })();
