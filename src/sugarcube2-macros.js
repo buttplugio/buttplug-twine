@@ -168,7 +168,7 @@
     }
   });
 
-  Macro.add("buttplugdeviceaddedhandler", {
+  Macro.add("buttplugdeviceadded", {
 		tags: null,
     handler() {
       if (setup.bpClient === undefined) {
@@ -181,7 +181,7 @@
     }
   });
 
-  Macro.add("buttplugdeviceremovedhandler", {
+  Macro.add("buttplugdeviceremoved", {
 		tags: null,
     handler() {
       if (setup.bpClient === undefined) {
@@ -191,13 +191,6 @@
 				State.temporary.device = device;
         Wikifier.wikifyEval(this.payload[0].contents.trim());
       });
-    }
-  });
-
-  Macro.add("buttplugdisconnecthandler", {
-		tags: null,
-    handler() {
-      // TODO Detect disconnect event, store/run wikified block.
     }
   });
 
