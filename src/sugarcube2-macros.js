@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.8.0/dist/web/buttplug.min.js').then(() => importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.8.0/dist/web/buttplug-devtools.min.js'));
+  const buttplugLoadingPromise = importScripts('https://cdn.jsdelivr.net/npm/buttplug@0.12.2/dist/web/buttplug.min.js');
 
   // Map multiple payloads from child tags to an es6 <string, object> map.
   function mapPayloads(payloads) {
@@ -34,36 +34,6 @@
     }
   });
 
-  Macro.add("buttplugdevtoolsshowlog", {
-    handler() {
-      ButtplugDevTools.CreateLoggerPanel(Buttplug.ButtplugLogger.Logger);
-    }
-  });
-
-  Macro.add("buttplugdevtoolsshowdevicepanel", {
-    handler() {
-      if (setup.bpClient === undefined) {
-        return;
-      }
-      try {
-        ButtplugDevTools.CreateDeviceManagerPanel(setup.bpClient.Connector.Server);
-      } catch (e) {
-        // We should do something more than catch and console here, but I'm not
-        // quite sure what.
-        console.log("Can't create device manager panel, as server doesn't have a test device manager");
-      }
-    }
-  });
-
-  Macro.add("buttplugdevtoolsclosedevicepanel", {
-    handler() {
-      const panelElement = document.getElementById("buttplug-test-device-manager-panel");
-      if (panelElement !== null) {
-        panelElement.remove();
-      }
-    }
-  });
-
   const teardownClient = () => {
     if (setup.bpClient !== undefined) {
     }
@@ -80,10 +50,12 @@
       setup.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
 
       try {
-        await setup.bpClient.ConnectLocal();
+        const connector = new Buttplug.ButtplugEmbeddedClientConnector();
+        await setup.bpClient.Connect(connector);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
+        console.log(e);
         Wikifier.wikifyEval(payloadMap.get("failure").contents);
       }
     }
@@ -103,7 +75,8 @@
       setup.bpClient = new Buttplug.ButtplugClient("Twine Buttplug Client");
 
       try {
-        await setup.bpClient.ConnectWebsocket(this.args[0]);
+        const connector = new Buttplug.ButtplugWebsocketClientConnector(this.args[0]);
+        await setup.bpClient.Connect(connector);
         // TODO: Check to see if we actually have success/failure tags
         Wikifier.wikifyEval(payloadMap.get("success").contents);
       } catch (e) {
