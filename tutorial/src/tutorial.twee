@@ -1,10 +1,11 @@
 :: StoryTitle
-
 Buttplug-Twine Tutorial
 
 :: StoryData
 {
-        "ifid": "E92D3B47-9B00-4FB9-B696-A6B81D213C34"
+  "ifid": "E92D3B47-9B00-4FB9-B696-A6B81D213C34",
+  "format": "SugarCube",
+  "format-version": "2.33.4"
 }
 
 :: Start
@@ -73,6 +74,7 @@ Time to connect!
 <<link "Click here to connect locally">>
 <<buttplugconnectlocal>>
 <<connecting>>
+<<addclass "#failure" "hide">>
 <<removeclass "#connector" "hide">>
 <<success>>
 <<addclass "#connector" "hide">>
@@ -89,6 +91,7 @@ Time to connect!
 <<success>>
 <<addclass "#connector" "hide">>
 <<removeclass "#success" "hide">>
+<<addclass "#failure" "hide">>
 <<failure>>
 <<addclass "#connector" "hide">>
 <<removeclass "#failure" "hide">>
@@ -99,31 +102,39 @@ Time to connect!
 <span id="failure" class="hide">Connection failed!</span>
 
 :: Scanning For Devices
-
-Now that we're connected to a server, we can start scanning for devices. To start and stop scanning for devices, we use the {{{<<buttplugstartscanning>>}}} and {{{<<buttplugstopscanning>>}}} macros. Using these macros will also set the {{{$buttplugscanning}}} boolean variable. You can check whether or not scanning is still happening and possibly restrict navigation based on that, so that you don't get new device notifications later that you have to handle in every passage.
-
-So what happens when the scanner finds a device? This is where things get a little strange. We'll need Twine to react to events coming from devices asyncronously. We can do this using the {{{<<buttplugdeviceadded>>}}} macro. Whatever commands you put in this macro will be executed every time a "deviceadded" event is received from the Buttplug Server. If you pass nothing to the macro, the event handler will be cleared. Similarly, if you would like to watch for device removal (i.e. someone turned off their bluetooth toy and you want to react accordingly), you'd use the {{{<<buttplugdeviceremoved>>}}} macro.
-
+<<nobr>>
+Now that we're connected to a server, we can start scanning for devices. To start and stop scanning for devices, we use the {{{<<buttplugstartscanning>>}}} and {{{<<buttplugstopscanning>>}}} macros. Using these macros will also set the {{{$buttplugscanning}}} boolean variable. You can check whether or not scanning is still happening and possibly restrict navigation based on that, so that you don't get new device notifications later that you have to handle in every passage.<br>
+<br>
+So what happens when the scanner finds a device? This is where things get a little strange. We'll need Twine to react to events coming from devices asyncronously. We can do this using the {{{<<buttplugdeviceadded>>}}} macro. Whatever commands you put in this macro will be executed every time a "deviceadded" event is received from the Buttplug Server. If you pass nothing to the macro, the event handler will be cleared. Similarly, if you would like to watch for device removal (i.e. someone turned off their bluetooth toy and you want to react accordingly), you'd use the {{{<<buttplugdeviceremoved>>}}} macro.<br>
+<br>
 <<link "Click here to start scanning">>
-<<buttplugstartscanning>>
-<<removeclass "#devicediv" "hide">>
-<</link>>
-
+  <<if setup.bpClient.devices && !_listed>>
+    <<set _listed = true>>
+    <<for _device range setup.bpClient.devices>>
+      <<capture _device>>
+        <<append "#devicelist">><li><<=_device._deviceInfo.DeviceName>></li><</append>>
+      <</capture>>
+    <</for>>
+  <</if>>
+  <<buttplugstartscanning>>
+  <<removeclass "#devicediv" "hide">>
+<</link>><br>
 <<link "Click here to stop scanning">>
-<<buttplugstopscanning>>
-<</link>>
-
+  <<buttplugstopscanning>>
+<</link>><br>
+<br>
 <div id="devicediv" class="hide">
 <b>Devices Found:</b>
 <ul id="devicelist">
 </ul>
 </div>
-
+<br>
 <<buttplugdeviceadded>>
 <<append "#devicelist">><li>_device.Name</li><</append>>
 <</buttplugdeviceadded>>
-
+<br>
 Now that you know how to find devices, [[we can talk about what you can do with them|Handling Devices]]!
+<</nobr>>
 
 :: Handling Devices
 
@@ -133,49 +144,77 @@ Below is a list of your currently connected devices, along with various actions 
 
 <<nobr>>
 <ul>
-<<for _device range setup.bpClient.Devices>>
-<<capture _device>>
-<li>_device.Name</li>
-<ul>
-<<for _msg range _device.AllowedMessages>>
-<<if _msg eq "VibrateCmd">>
-  <li>
-  <<link "Click here to Vibrate for 1 second">>
-  <<buttplugvibrate _device 1.0>><</buttplugvibrate>>
-  <<timed 1s>>
-    <<buttplugvibrate _device 0.0>><</buttplugvibrate>>
-  <</timed>>
-  <</link>>
-  </li>
-<</if>>
-<</for>>
-<<for _msg range _device.AllowedMessages>>
-<<if _msg eq "LinearCmd">>
-  <li>
-  <<link "Click here to move back and forth once">>
-  <<buttpluglinear _device 0.0 1.0>><</buttpluglinear>>
-  <<timed 1s>>
-    <<buttpluglinear _device 1.0 1.0>><</buttpluglinear>>
-    <<timed 1s>>
-      <<buttpluglinear _device 0.0 1.0>><</buttpluglinear>>
-    <</timed>>
-  <</timed>>
-  <</link>>
-  </li>
-<</if>>
-<<if _msg eq "RotateCmd">>
-  <li>
-  <<link "Click here to rotate for one second">>
-  <<buttplugrotate _device 1.0 true>><</buttplugrotate>>
-  <<timed 1s>>
-    <<buttplugrotate _device 0.0 true>><</buttplugrotate>>
-  <</timed>>
-  <</link>>
-  </li>
-<</if>>
-<</for>>
-</ul>
-<</capture>>
+<<for _device range setup.bpClient.devices>>
+  <<capture _device>>
+    <<set _id = "device_" + _device._deviceInfo.DeviceIndex>>
+    <li>_device._deviceInfo.DeviceName <<buttplugbattery _device _id>></li>
+    <ul>
+      <<for _feat range _device._features>>
+        <<capture _feat>>
+          <<if _feat._feature.hasOwnProperty("Output")>>
+            <<for _type range Object.keys(_feat._feature.Output)>>
+              <<switch _type>>
+              <<case "Vibrate">>
+                <li>
+                  <<link "Click here to Vibrate for 1 second">>
+                    <<buttplugvibrate _feat 1.0>><</buttplugvibrate>>
+                    <<timed 1s>>
+                      <<buttplugvibrate _feat 0.0>><</buttplugvibrate>>
+                    <</timed>>
+                  <</link>>
+                </li>
+              <<case "Oscillate">>
+                <li>
+                  <<link "Click here to Oscilate for 1 second">>
+                    <<buttplugoscillate _feat 1.0>><</buttplugoscillate>>
+                    <<timed 1s>>
+                      <<buttplugoscillate _feat 0.0>><</buttplugoscillate>>
+                    <</timed>>
+                  <</link>>
+                </li>
+              <<case "Rotate">>
+                  <li>
+                    <<link "Click here to rotate for one second">>
+                      <<buttplugrotate _feat 1.0 true>><</buttplugrotate>>
+                      <<timed 1s>>
+                        <<buttplugrotate _feat 0.0 true>><</buttplugrotate>>
+                      <</timed>>
+                    <</link>>
+                  </li>
+              <<case "Position">>
+              <<case "PositionWithDuration">>
+              <<case "HwPositionWithDuration">>
+                <li>
+                  <<link "Click here to move back and forth once">>
+                    <<buttplugposition _device 0.0 1.0>><</buttplugposition>>
+                    <<timed 1s>>
+                      <<buttplugposition _device 1.0 1.0>><</buttplugposition>>
+                      <<timed 1s>>
+                        <<buttplugposition _device 0.0 1.0>><</buttplugposition>>
+                      <</timed>>
+                    <</timed>>
+                  <</link>>
+                </li>
+              <<default>>
+                ERROR: unexpected Output feature type: <<=_type>>
+              <</switch>>
+            <</for>>
+          <<elseif _feat._feature.hasOwnProperty("Input")>>
+              <<for _type range Object.keys(_feat._feature.Input)>>
+                <<switch _type>>
+                <<case "Battery">>
+                  /% noop %/
+                <<default>>
+                  Unhandled Input feature type: <<=_type>>
+                <</switch>>
+              <</for>>
+          <<else>>
+            Feature neither output nor input: <<=JSON.stringify(_feat)>>
+          <</if>>
+        <</capture>>
+      <</for>>
+    </ul>
+  <</capture>>
 <</for>>
 </ul>
 <</nobr>>
